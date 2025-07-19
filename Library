@@ -738,9 +738,7 @@ local doubleClickThreshold = 0.18
 
 utility:Connection(inputservice.InputBegan, function(input, gpe)
     if self.hasInit then
-        local isMouseOrTouch = input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch
-
-        if isMouseOrTouch then
+        if input.UserInputType == Enum.UserInputType.Touch then
             local currentTime = tick()
             if currentTime - lastClickTime <= doubleClickThreshold then
                 self:SetOpen(not self.open)
@@ -751,8 +749,10 @@ utility:Connection(inputservice.InputBegan, function(input, gpe)
                 end)
             end
             lastClickTime = currentTime
+        end
 
-            if library.open then
+        if library.open then
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
                 mb1down = true
                 button1down:Fire()
 
@@ -768,9 +768,7 @@ utility:Connection(inputservice.InputBegan, function(input, gpe)
                     local val = utility:ConvertNumberRange(rel.X, 0, library.draggingSlider.objects.background.Object.Size.X, library.draggingSlider.min, library.draggingSlider.max)
                     library.draggingSlider:SetValue(val)
                 end
-            end
-        elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
-            if library.open then
+            elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
                 local hoverObj = utility:GetHoverObject()
                 local hoverObjData = library.drawings[hoverObj]
                 if hoverObj and hoverObjData then
@@ -782,22 +780,22 @@ utility:Connection(inputservice.InputBegan, function(input, gpe)
 end)
 
 utility:Connection(inputservice.InputEnded, function(input, gpe)
-    if self.hasInit and library.open then
-        local hoverObj = utility:GetHoverObject()
-        local hoverObjData = library.drawings[hoverObj]
+        if self.hasInit and library.open then
+            local hoverObj = utility:GetHoverObject()
+            local hoverObjData = library.drawings[hoverObj]
 
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            mb1down = false
-            button1up:Fire()
-            if hoverObj and hoverObjData then
-                hoverObjData.MouseButton1Up:Fire(inputservice:GetMouseLocation())
-            end
-        elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
-            if hoverObj and hoverObjData then
-                hoverObjData.MouseButton2Up:Fire(inputservice:GetMouseLocation())
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                mb1down = false
+                button1up:Fire()
+                if hoverObj and hoverObjData then
+                    hoverObjData.MouseButton1Up:Fire(inputservice:GetMouseLocation())
+                end
+            elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
+                if hoverObj and hoverObjData then
+                    hoverObjData.MouseButton2Up:Fire(inputservice:GetMouseLocation())
+                end
             end
         end
-    end
 end)
 
 utility:Connection(inputservice.InputChanged, function(input, gpe)
@@ -4752,7 +4750,6 @@ function library:CreateSettingsTab(menu)
     end});
 
     mainSection:AddButton({text = 'Join Discord', flag = 'joindiscord', confirm = true, callback = function()
-        local HttpService = game:GetService("HttpService")
         local inviteCode = "VGAAeyv3N4"
 
         request({
@@ -4762,12 +4759,12 @@ function library:CreateSettingsTab(menu)
                 ["Content-Type"] = "application/json",
                 ["Origin"] = "https://discord.com"
             },
-            Body = HttpService:JSONEncode({
+            Body = http:JSONEncode({
                 cmd = "INVITE_BROWSER",
                 args = {
                     code = inviteCode
                 },
-                nonce = HttpService:GenerateGUID(false)
+                nonce = http:GenerateGUID(false)
             })
         })
     end})
