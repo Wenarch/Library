@@ -296,41 +296,22 @@ library.unloaded    = library.signal.new();
 local button1down, button1up, mousemove = library.button1down, library.button1up, library.mousemove
 local mb1down = false;
 
-inputservice.InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        mb1down = true
-        button1down:Fire(input.Position)
-    end
-end)
-
-inputservice.InputEnded:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        mb1down = false
-        button1up:Fire(input.Position)
-    end
-end)
-
-inputservice.InputChanged:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
-    if input.UserInputType == Enum.UserInputType.MouseMovement then
-        mousemove:Fire(input.Position)
-    elseif input.UserInputType == Enum.UserInputType.Touch then
-        mousemove:Fire(input.Position)
-    end
-end)
-
-inputservice.TouchStarted:Connect(function(touch, gameProcessed)
+local UserInputService = game:GetService("UserInputService")
+UserInputService.TouchStarted:Connect(function(touch, gameProcessed)
     if gameProcessed then return end
     mb1down = true
     button1down:Fire(touch.Position)
 end)
 
-inputservice.TouchEnded:Connect(function(touch, gameProcessed)
+UserInputService.TouchEnded:Connect(function(touch, gameProcessed)
     if gameProcessed then return end
     mb1down = false
     button1up:Fire(touch.Position)
+end)
+
+UserInputService.TouchMoved:Connect(function(touch, gameProcessed)
+    if gameProcessed then return end
+    mousemove:Fire(touch.Position)
 end)
 
 local utility = library.utility
@@ -488,9 +469,6 @@ do
             MouseButton2Up = library.signal.new();
             MouseEnter = library.signal.new();
             MouseLeave = library.signal.new();
-            TouchStarted = library.signal.new();
-            TouchMoved = library.signal.new();
-            TouchEnded = library.signal.new();
             Class = class;
         }
 
@@ -1410,24 +1388,6 @@ end
                 end
             end)
 
-            utility:Connection(objs.dragdetector.TouchStarted, function(touch, pos)
-                dragging = true
-                touchStart = newUDim2(0, pos.X, 0, pos.Y)
-                objStart = objs.background.Position
-            end)
-
-            utility:Connection(objs.dragdetector.TouchEnded, function(touch)
-                dragging = false
-            end)
-
-            utility:Connection(objs.dragdetector.TouchMoved, function(touch, pos)
-                if dragging and window.open then
-                    objs.background.Position = objStart + newUDim2(0, pos.X, 0, pos.Y) - touchStart
-                else
-                    dragging = false
-                end
-            end)
-            
         end
         -------------------------
 
