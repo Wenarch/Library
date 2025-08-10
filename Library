@@ -734,22 +734,7 @@ function library:init()
         end
     end
 
-    local screenGui = Instance.new('ScreenGui');
-    if syn then syn.protect_gui(screenGui); end
-    screenGui.Parent = game:GetService('CoreGui');
-    screenGui.Enabled = true;
-    utility:Instance('ImageButton', {
-        Parent = screenGui,
-        Visible = true,
-        Modal = true,
-        Size = UDim2.new(1,0,1,0),
-        ZIndex = 9999999999,
-        Transparency = 1;
-    })
 
-    utility:Connection(library.unloaded, function()
-        screenGui:Destroy()
-    end)
 
 local lastClickTime = 0
 local doubleClickThreshold = 0.18
@@ -852,7 +837,6 @@ end)
 
 function self:SetOpen(bool)
     self.open = bool
-    screenGui.Enabled = bool
 
     if bool and library.flags.disablemenumovement then
         actionservice:BindAction(
